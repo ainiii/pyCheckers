@@ -6,14 +6,16 @@ class MainMenu(tk.Frame, AbstractFrame):
         tk.Frame.__init__(self, parent)
         self.parent = parent
 
-        self.subtitle = tk.Label(self, text="Choose").grid(row=0, column=0)
+        self.hostOption = tk.Button(self, text="Host").grid(row=0, column=2, padx=5, sticky='nesw')
+        self.joinOption = tk.Button(self, text="Join").grid(row=1, column=2, padx=5, sticky='nesw')
+        self.offlineOption = tk.Button(self, text="Offline").grid(row=2, column=2, padx=5, sticky='nesw')
 
-        self.hostOption = tk.Button(self, text="Host").grid(row=1, column=0)
-        self.joinOption = tk.Button(self, text="Join").grid(row=2, column=0)
-        self.offlineOption = tk.Button(self, text="Offline").grid(row=3, column=0)
+        self.hostTxt = tk.Label(self, text="Ip address:").grid(row=0, column=0, sticky='w')
+        self.portTxt = tk.Label(self, text="Port:").grid(row=1, column=0, sticky='w')
+        self.hostInput = tk.Entry(self).grid(row=0, column=1)
+        self.portInput = tk.Entry(self).grid(row=1, column=1)
 
-        self.hostTxt = tk.Entry(self, width=10).grid(row=0, column=2)
-        self.portTxt = tk.Entry(self, width=10).grid(row=0, column=3)
+        self.infoTxt = tk.Label(self, text="Placeholder").grid(row=2, column=0, columnspan=2, sticky='w')
 
     def show(self):
         self.pack()
