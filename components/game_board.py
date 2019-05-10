@@ -2,7 +2,7 @@ import tkinter as tk
 from .abstract_frame import AbstractFrame
 
 class GameBoard(tk.Frame, AbstractFrame):
-    def __init__(self, parent, rows=8, columns=8, size=32, color1='white', color2='gray'):
+    def __init__(self, parent, rows=8, columns=8, size=32, color1='red', color2='blue'):
         tk.Frame.__init__(self, parent)
         self.parent = parent
 
@@ -37,6 +37,10 @@ class GameBoard(tk.Frame, AbstractFrame):
     def updatePieceType(self, name, pType):
         self.canvas.delete(name)
         self.addPiece(name, pType, self.pieces[name][0], self.pieces[name][1])
+
+    def removePiece(self, name):
+        self.canvas.delete(name)
+        del self.pieces[name]
 
     def onResize(self, event):
         newXSize = int((event.width - 1) / self.columns)

@@ -34,7 +34,7 @@ class MainFrame(tk.Frame):
                 print("Failed to join, retrying.")
                 time.sleep(1)
 
-        self.gameInstance = game.Game(player, sock)
+        self.gameInstance = game.Game(player, sock, self.gameBoard)
         client.ClientThread(sock, self.gameInstance)
         self.showGame()
 

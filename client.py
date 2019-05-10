@@ -1,5 +1,4 @@
 import threading
-import socket
 
 class ClientThread(threading.Thread):
     def __init__(self, sock, game):
