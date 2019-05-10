@@ -75,6 +75,8 @@ class GameBoard(tk.Frame, AbstractFrame):
         elif result[1] > 7:
             result[1] = 7
 
+        self.parent.gameInstance.onClick(result)
+
     def show(self):
         self.pack(side='top', fill='both', expand=True, padx=4, pady=4)
         self.canvas.pack(side='top', fill='both', expand=True, padx=2, pady=2)
