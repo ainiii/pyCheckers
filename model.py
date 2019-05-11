@@ -31,6 +31,9 @@ class Model:
     def changeTurn(self):
         self.turn = 1 if self.turn == 2 else 2
 
+    def getTurn(self):
+        return self.turn
+
     def addPiece(self, name, pType, row, column):
         piece = type('piece', (), {'name': name, 'pType': pType, 'row': row, 'column': column})
         self.board[row][column] = piece()
@@ -41,6 +44,10 @@ class Model:
 
         if row is False or column is False:
             return
+
+        if abs(row - toRow) > 1 and abs(column - toColumn) > 1:
+            x, y = self.getDirection(row, column, toRow, toColumn)
+            self.removePiece(self.getPieceByCoords(row + x, column + y).name)
 
         self.board[toRow][toColumn] = copy.deepcopy(self.board[row][column])
         self.board[toRow][toColumn].row = toRow
@@ -67,6 +74,12 @@ class Model:
         self.board[row][column] = False
         self.addEvent('remove', name)
 
+    def highlightPiece(self, name):
+        self.addEvent('highlight', name)
+
+    def removeHighlightPiece(self):
+        self.addEvent('rhighlight')
+
     def getPieceByName(self, name):
         for i in range(8):
             for j in range(8):
@@ -87,6 +100,49 @@ class Model:
                     pieces.append(self.board[i][j])
 
         return pieces
+
+    def getPieceOwner(self, piece):
+        return int(piece.pType[1])
+
+    def getDirection(self, row0, col0, row1, col1):
+        if row0 > row1 and col0 > col1:
+            return (-1, -1)
+        elif row0 > row1 and col0 < col1:
+            return (-1, 1)
+        elif row0 < row1 and col0 > col1:
+            return (1, -1)
+        elif row0 < row1 and col0 < col1:
+            return (1, 1)
+
+    def isValidMove(self, piece, toRow, toColumn):
+        rowDiff = abs(piece.row - toRow)
+        colDiff = abs(piece.column - toColumn)
+
+        if piece.pType[2] == 'k':
+            return rowDiff == 1 and colDiff == 1
+        else:
+            if self.getPieceOwner(piece) == 1:
+                return rowDiff == 1 and colDiff == 1 and toRow < piece.row
+            else:
+                return rowDiff == 1 and colDiff == 1 and toRow > piece.row
+
+    def canCapture(self, player):
+        pieces = self.getPieces()
+        moves = [(-2, -2), (-2, 2), (2, 2), (2, -2)]
+
+        for piece in pieces:
+            if self.getPieceOwner(piece) == player:
+                for move in moves:
+                    if self.isInRange((piece.row + move[0], piece.column + move[1])):
+                        pieceAt = self.getPieceByCoords(int(piece.row + move[0] / 2), int(piece.column + move[1] / 2))
+
+                        if pieceAt and self.getPieceOwner(pieceAt) != player and self.getPieceByCoords(piece.row + move[0], piece.column + move[1]) is False:
+                            return piece.name, piece.row + move[0], piece.column + move[1]
+
+        return False, False, False
+
+    def isInRange(self, coords):
+        return 0 <= coords[0] <= 7 and 0 <= coords[1] <= 7
 
     def addEvent(self, *args):
         result = args[0]

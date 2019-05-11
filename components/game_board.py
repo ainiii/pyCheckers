@@ -17,11 +17,14 @@ class GameBoard(tk.Frame, AbstractFrame):
             'p1p': tk.PhotoImage(file='resources/p1p.png'),
             'p1k': tk.PhotoImage(file='resources/p1k.png'),
             'p2p': tk.PhotoImage(file='resources/p2p.png'),
-            'p2k': tk.PhotoImage(file='resources/p2k.png')
+            'p2k': tk.PhotoImage(file='resources/p2k.png'),
+            'highlight': tk.PhotoImage(file='resources/highlight.png')
         }
         self.model = False
 
         self.canvas = tk.Canvas(self, borderwidth=0, highlightthickness=0, width=rows*size, height=columns*size)
+        self.highlight = self.canvas.create_image(0, 0, image=self.pieceImages['highlight'], tags='highlight', anchor='c', state=tk.HIDDEN)
+        self.lastHighlight = False
         self.canvas.bind('<Configure>', self.onResize)
         self.canvas.bind('<Button-1>', self.onClick)
 
@@ -30,8 +33,10 @@ class GameBoard(tk.Frame, AbstractFrame):
         UpdateThread(self, model)
 
     def addPiece(self, name, pType, row, column):
-        self.canvas.create_image(0, 0, image=self.pieceImages[pType], tags=(name, 'piece'), anchor='c')
-        self.movePiece(name, row, column)
+        x0 = column * self.size + int(self.size / 2)
+        y0 = row * self.size + int(self.size / 2)
+
+        self.canvas.create_image(x0, y0, image=self.pieceImages[pType], tags=(name, 'piece'), anchor='c')
 
     def movePiece(self, name, row, column):
         x0 = column * self.size + int(self.size / 2)
@@ -44,6 +49,17 @@ class GameBoard(tk.Frame, AbstractFrame):
 
     def removePiece(self, name):
         self.canvas.delete(name)
+
+    def highlightPiece(self, name):
+        pieceCoords = self.canvas.coords(name)
+        self.canvas.coords('highlight', pieceCoords[0], pieceCoords[1])
+        self.canvas.itemconfigure('highlight', state=tk.NORMAL)
+        self.canvas.tag_raise('highlight')
+        self.lastHighlight = name
+
+    def removeHighlight(self):
+        self.lastHighlight = False
+        self.canvas.itemconfigure('highlight', state=tk.HIDDEN)
 
     def onResize(self, event):
         newXSize = int((event.width - 1) / self.columns)
@@ -71,6 +87,9 @@ class GameBoard(tk.Frame, AbstractFrame):
 
         self.canvas.tag_raise('piece')
         self.canvas.tag_lower('tile')
+
+        if self.lastHighlight:
+            self.highlightPiece(self.lastHighlight)
 
     def onClick(self, event):
         canvas = event.widget
@@ -120,5 +139,10 @@ class UpdateThread(threading.Thread):
                 elif eType == 'remove':
                     name = result[1]
                     self.parent.removePiece(name)
+                elif eType == 'highlight':
+                    name = result[1]
+                    self.parent.highlightPiece(name)
+                elif eType == 'rhighlight':
+                    self.parent.removeHighlight()
             else:
-                time.sleep(0.05)
+                time.sleep(0.01)
