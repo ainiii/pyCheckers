@@ -157,6 +157,22 @@ class Model:
     def isInRange(self, coords):
         return 0 <= coords[0] <= 7 and 0 <= coords[1] <= 7
 
+    def checkWinner(self):
+        pieces = self.getPieces()
+        p1 = 0
+        p2 = 0
+
+        for piece in pieces:
+            if self.getPieceOwner(piece) == 1:
+                p1 += 1
+            else:
+                p2 += 1
+
+        if p1 == 0:
+            self.addEvent('winner', 2)
+        elif p2 == 0:
+            self.addEvent('winner', 1)
+
     def addEvent(self, *args):
         result = args[0]
 

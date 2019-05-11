@@ -24,7 +24,7 @@ class GameBoard(tk.Frame, AbstractFrame):
         self.model = False
 
         self.canvas = tk.Canvas(self, bd=0, highlightthickness=0, width=rows*size, height=columns*size + 20)
-        self.highlight = self.canvas.create_image(0, 0, image=self.pieceImages['highlight'], tags='highlight', anchor='c', state=tk.HIDDEN)
+        self.highlight = False
         self.topTxt = False
         self.lastHighlight = False
         self.canvas.bind('<Configure>', self.onResize)
@@ -36,6 +36,11 @@ class GameBoard(tk.Frame, AbstractFrame):
 
     def changeTurn(self, player):
         self.canvas.itemconfigure(self.topTxt, text="Player " + str(player) + " turn")
+
+    def setWinner(self, player):
+        self.canvas.itemconfigure(self.topTxt, text="Player " + str(player) + " won the game, restarting in 5 seconds")
+        time.sleep(5)
+        self.parent.showMenu()
 
     def addPiece(self, name, pType, row, column):
         x0 = column * self.size + int(self.size / 2)
@@ -113,7 +118,8 @@ class GameBoard(tk.Frame, AbstractFrame):
     def show(self):
         self.pack(side='top', fill='both', expand=True)
         self.canvas.pack(side='top', fill='both', expand=True)
-        self.canvas.create_text(self.rows * self.size / 2, self.columns * self.size + 10, text="Player 1 turn")
+        self.topTxt = self.canvas.create_text(self.rows * self.size / 2, self.columns * self.size + 10, text="Player 1 turn")
+        self.canvas.create_image(0, 0, image=self.pieceImages['highlight'], tags='highlight', anchor='c', state=tk.HIDDEN)
 
     def hide(self):
         self.pack_forget()
@@ -155,6 +161,10 @@ class UpdateThread(threading.Thread, abstract_thread.AbstractThread):
                 elif eType == 'turn':
                     player = result[1]
                     self.parent.changeTurn(player)
+                elif eType == 'winner':
+                    winner = result[1]
+                    self.parent.setWinner(winner)
+
             else:
                 time.sleep(0.01)
 

@@ -59,3 +59,4 @@ class Game:
         elif text[0] == 't':
             self.model.changeTurn()
             self.model.removeHighlightPiece()
+            self.model.checkWinner()
