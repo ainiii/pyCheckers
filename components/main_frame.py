@@ -4,6 +4,7 @@ import time
 import server
 import client
 import game
+import model
 from .main_menu import MainMenu
 from .game_board import GameBoard
 
@@ -15,7 +16,8 @@ class MainFrame(tk.Frame):
         self.mainMenu = MainMenu(self)
         self.gameBoard = GameBoard(self)
 
-        self.gameInstance = False
+        self.model = False
+        self.game = False
 
         self.mainMenu.show()
 
@@ -34,7 +36,9 @@ class MainFrame(tk.Frame):
                 print("Failed to join, retrying.")
                 time.sleep(1)
 
-        self.gameInstance = game.Game(player, sock, self.gameBoard)
+        self.model = model.Model()
+        self.gameBoard.attachModel(self.model)
+        self.gameInstance = game.Game(player, sock, self.model)
         client.ClientThread(sock, self.gameInstance)
         self.showGame()
 

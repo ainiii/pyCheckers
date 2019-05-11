@@ -34,6 +34,7 @@ class ReceiveThread(threading.Thread):
     def run(self):
         while True:
             data = self.sock.recv(1024)
+
             if data:
                 self.sock.send(data)
                 self.otherSock.send(data)
