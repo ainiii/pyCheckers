@@ -1,40 +1,58 @@
 import threading
 import socket
+import abstract_thread
 
-class ServerThread(threading.Thread):
+class ServerThread(threading.Thread, abstract_thread.AbstractThread):
     def __init__(self, ip, port):
         threading.Thread.__init__(self)
         self.ip = ip
         self.port = port
-        self.start()
+        self.sock = False
         self.sockets = []
+        self.isRunning = True
+        self.start()
 
     def run(self):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind((self.ip, self.port))
-        sock.listen(2)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.bind((self.ip, self.port))
+        self.sock.listen(2)
 
-        while True:
-            cSocket, address = sock.accept()
-            print("New connection from: " + str(address))
+        while self.isRunning:
+            try:
+                cSocket, address = self.sock.accept()
+                print("New connection from: " + str(address))
 
-            self.sockets.append(cSocket)
+                self.sockets.append(cSocket)
 
-            if len(self.sockets) == 2:
-                ReceiveThread(cSocket, self.sockets[0])
-                ReceiveThread(self.sockets[0], cSocket)
+                if len(self.sockets) == 2:
+                    ReceiveThread(cSocket, self.sockets[0])
+                    ReceiveThread(self.sockets[0], cSocket)
+            except:
+                break
 
-class ReceiveThread(threading.Thread):
+    def stop(self):
+        self.isRunning = False
+        self.sock.close()
+
+class ReceiveThread(threading.Thread, abstract_thread.AbstractThread):
     def __init__(self, sock, otherSock):
         threading.Thread.__init__(self)
         self.sock = sock
         self.otherSock = otherSock
+        self.isRunning = True
         self.start()
 
     def run(self):
-        while True:
-            data = self.sock.recv(1024)
+        while self.isRunning:
+            try:
+                data = self.sock.recv(1024)
 
-            if data:
-                self.sock.send(data)
-                self.otherSock.send(data)
+                if data:
+                    self.sock.send(data)
+                    self.otherSock.send(data)
+            except:
+                break
+
+    def stop(self):
+        self.isRunning = False
+        self.sock.close()

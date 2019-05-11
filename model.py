@@ -30,6 +30,7 @@ class Model:
 
     def changeTurn(self):
         self.turn = 1 if self.turn == 2 else 2
+        self.addEvent('turn', self.turn)
 
     def getTurn(self):
         return self.turn
@@ -41,6 +42,7 @@ class Model:
 
     def movePiece(self, name, toRow, toColumn):
         row, column = self.getPieceByName(name)
+        ret = False
 
         if row is False or column is False:
             return
@@ -48,13 +50,23 @@ class Model:
         if abs(row - toRow) > 1 and abs(column - toColumn) > 1:
             x, y = self.getDirection(row, column, toRow, toColumn)
             self.removePiece(self.getPieceByCoords(row + x, column + y).name)
+            ret = True
 
         self.board[toRow][toColumn] = copy.deepcopy(self.board[row][column])
         self.board[toRow][toColumn].row = toRow
         self.board[toRow][toColumn].column = toColumn
 
         self.board[row][column] = False
+
+        if self.getTurn() == 1:
+            if toRow == 0:
+                self.updatePieceType(name, 'p1k')
+        else:
+            if toRow == 7:
+                self.updatePieceType(name, 'p2k')
+
         self.addEvent('move', name, toRow, toColumn)
+        return ret
 
     def updatePieceType(self, name, pType):
         row, column = self.getPieceByName(name)
@@ -129,6 +141,7 @@ class Model:
     def canCapture(self, player):
         pieces = self.getPieces()
         moves = [(-2, -2), (-2, 2), (2, 2), (2, -2)]
+        possibleMoves = []
 
         for piece in pieces:
             if self.getPieceOwner(piece) == player:
@@ -137,9 +150,9 @@ class Model:
                         pieceAt = self.getPieceByCoords(int(piece.row + move[0] / 2), int(piece.column + move[1] / 2))
 
                         if pieceAt and self.getPieceOwner(pieceAt) != player and self.getPieceByCoords(piece.row + move[0], piece.column + move[1]) is False:
-                            return piece.name, piece.row + move[0], piece.column + move[1]
+                            possibleMoves.append((piece.name, piece.row + move[0], piece.column + move[1]))
 
-        return False, False, False
+        return possibleMoves
 
     def isInRange(self, coords):
         return 0 <= coords[0] <= 7 and 0 <= coords[1] <= 7

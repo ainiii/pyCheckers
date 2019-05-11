@@ -1,6 +1,7 @@
 import tkinter as tk
 import threading
 import time
+import abstract_thread
 from .abstract_frame import AbstractFrame
 
 class GameBoard(tk.Frame, AbstractFrame):
@@ -22,8 +23,9 @@ class GameBoard(tk.Frame, AbstractFrame):
         }
         self.model = False
 
-        self.canvas = tk.Canvas(self, borderwidth=0, highlightthickness=0, width=rows*size, height=columns*size)
+        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0, width=rows*size, height=columns*size + 20)
         self.highlight = self.canvas.create_image(0, 0, image=self.pieceImages['highlight'], tags='highlight', anchor='c', state=tk.HIDDEN)
+        self.topTxt = False
         self.lastHighlight = False
         self.canvas.bind('<Configure>', self.onResize)
         self.canvas.bind('<Button-1>', self.onClick)
@@ -31,6 +33,9 @@ class GameBoard(tk.Frame, AbstractFrame):
     def attachModel(self, model):
         self.model = model
         UpdateThread(self, model)
+
+    def changeTurn(self, player):
+        self.canvas.itemconfigure(self.topTxt, text="Player " + str(player) + " turn")
 
     def addPiece(self, name, pType, row, column):
         x0 = column * self.size + int(self.size / 2)
@@ -62,11 +67,12 @@ class GameBoard(tk.Frame, AbstractFrame):
         self.canvas.itemconfigure('highlight', state=tk.HIDDEN)
 
     def onResize(self, event):
-        newXSize = int((event.width - 1) / self.columns)
-        newYSize = int((event.height - 1) / self.rows)
+        newXSize = int(event.width / self.columns)
+        newYSize = int(event.height / self.rows)
         color = self.color2
 
         self.size = min(newXSize, newYSize)
+        self.canvas.coords(self.topTxt, self.rows * self.size / 2, self.columns * self.size + 10)
         self.canvas.delete('tile')
 
         for row in range(self.rows):
@@ -105,22 +111,24 @@ class GameBoard(tk.Frame, AbstractFrame):
         self.parent.gameInstance.onClick(result)
 
     def show(self):
-        self.pack(side='top', fill='both', expand=True, padx=4, pady=4)
-        self.canvas.pack(side='top', fill='both', expand=True, padx=2, pady=2)
+        self.pack(side='top', fill='both', expand=True)
+        self.canvas.pack(side='top', fill='both', expand=True)
+        self.canvas.create_text(self.rows * self.size / 2, self.columns * self.size + 10, text="Player 1 turn")
 
     def hide(self):
         self.pack_forget()
         self.canvas.pack_forget()
 
-class UpdateThread(threading.Thread):
+class UpdateThread(threading.Thread, abstract_thread.AbstractThread):
     def __init__(self, parent, model):
         threading.Thread.__init__(self)
         self.parent = parent
         self.model = model
+        self.isRunning = True
         self.start()
 
     def run(self):
-        while True:
+        while self.isRunning:
             event = self.model.getNextEvent()
 
             if event:
@@ -144,5 +152,11 @@ class UpdateThread(threading.Thread):
                     self.parent.highlightPiece(name)
                 elif eType == 'rhighlight':
                     self.parent.removeHighlight()
+                elif eType == 'turn':
+                    player = result[1]
+                    self.parent.changeTurn(player)
             else:
                 time.sleep(0.01)
+
+    def stop(self):
+        self.isRunning = False

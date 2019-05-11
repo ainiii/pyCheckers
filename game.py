@@ -19,10 +19,10 @@ class Game:
                 self.cPiece = piece
 
         if self.cPiece:
-            name, row, column = self.model.canCapture(self.player)
+            possibleMoves = self.model.canCapture(self.player)
 
-            if name is not False and row is not False and column is not False:
-                if self.cPiece.name == name and result[0] == row and result[1] == column:
+            if len(possibleMoves) > 0:
+                if (self.cPiece.name, result[0], result[1]) in possibleMoves:
                     self.sock.send(str.encode('m|' + str(self.cPiece.name) + '|' + str(result[0]) + '|' + str(result[1])))
                     return
                 else:
@@ -42,11 +42,17 @@ class Game:
             toX = text[2]
             toY = text[3]
 
-            self.model.movePiece(name, int(toX), int(toY))
+            capture = self.model.movePiece(name, int(toX), int(toY))
 
-            name, row, column = self.model.canCapture(self.model.getTurn())
+            if capture:
+                possibleMoves = self.model.canCapture(self.model.getTurn())
 
-            if name is False and row is False and column is False:
+                if len(possibleMoves) == 0:
+                    if self.model.getTurn() == self.player:
+                        self.sock.send(str.encode('t'))
+                else:
+                    self.model.highlightPiece(name)
+            else:
                 if self.model.getTurn() == self.player:
                     self.sock.send(str.encode('t'))
         # t

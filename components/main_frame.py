@@ -5,6 +5,8 @@ import server
 import client
 import game
 import model
+import threading
+import abstract_thread
 from .main_menu import MainMenu
 from .game_board import GameBoard
 
@@ -19,7 +21,7 @@ class MainFrame(tk.Frame):
         self.model = False
         self.game = False
 
-        self.mainMenu.show()
+        self.showMenu()
 
     def hostGame(self, ip, port):
         server.ServerThread(ip, port)
@@ -51,3 +53,14 @@ class MainFrame(tk.Frame):
     def showGame(self):
         self.mainMenu.hide()
         self.gameBoard.show()
+
+    def showMenu(self):
+        self.gameBoard.hide()
+        self.gameBoard.canvas.delete('all')
+        self.mainMenu.show()
+        self.model = False
+        self.game = False
+
+        for thread in threading.enumerate():
+            if isinstance(thread, abstract_thread.AbstractThread):
+                thread.stop()
