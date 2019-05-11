@@ -130,6 +130,9 @@ class Model:
         rowDiff = abs(piece.row - toRow)
         colDiff = abs(piece.column - toColumn)
 
+        if self.board[toRow][toColumn]:
+            return False
+
         if piece.pType[2] == 'k':
             return rowDiff == 1 and colDiff == 1
         else:
@@ -137,6 +140,16 @@ class Model:
                 return rowDiff == 1 and colDiff == 1 and toRow < piece.row
             else:
                 return rowDiff == 1 and colDiff == 1 and toRow > piece.row
+
+    def getMoves(self, piece):
+        moves = []
+
+        for i in range(-1, 2, 2):
+            for j in range(-1, 2, 2):
+                if self.isInRange((piece.row + i, piece.column + j)) and self.isValidMove(piece, piece.row + i, piece.column + j):
+                    moves.append((piece.row + i, piece.column + j))
+
+        return moves
 
     def canCapture(self, player):
         pieces = self.getPieces()
@@ -170,8 +183,12 @@ class Model:
 
         if p1 == 0:
             self.addEvent('winner', 2)
+            return True
         elif p2 == 0:
             self.addEvent('winner', 1)
+            return True
+
+        return False
 
     def addEvent(self, *args):
         result = args[0]

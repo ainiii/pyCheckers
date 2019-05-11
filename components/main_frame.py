@@ -7,6 +7,7 @@ import game
 import model
 import threading
 import abstract_thread
+import ai
 from .main_menu import MainMenu
 from .game_board import GameBoard
 
@@ -47,7 +48,7 @@ class MainFrame(tk.Frame):
     def offlineGame(self):
         server.ServerThread('127.0.0.1', 50000)
         self.joinGame('127.0.0.1', 50000, 1)
-        # init ai on another thread
+        ai.AIThread('127.0.0.1', 50000)
         pass
 
     def showGame(self):
