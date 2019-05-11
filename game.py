@@ -62,7 +62,7 @@ class Game():
         piece = self.board[result[0]][result[1]]
 
         if self.cPiece != '':
-            self.movePiece(self.cPiece, result[0], result[1])
+            self.sock.send(str.encode('m|' + str(self.cPiece) + '|' + str(result[0]) + '|' + str(result[1])))
         elif piece and (piece.pType == ('p' + str(self.player) + 'p') or piece.pType == ('p' + str(self.player) + 'k')):
             self.cPiece = piece.name
 
@@ -71,11 +71,14 @@ class Game():
 
         # m|name|toX|toY
         if text[0] == 'm':
-            pass
+            name = text[1]
+            toX = text[2]
+            toY = text[3]
 
+            self.movePiece(name, int(toX), int(toY))
         # t
         elif text[0] == 't':
-            pass
+            self.changeTurn()
 
 class Piece():
     def __init__(self, name, pType):

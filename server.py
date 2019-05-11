@@ -22,7 +22,7 @@ class ServerThread(threading.Thread):
 
             if len(self.sockets) == 2:
                 ReceiveThread(cSocket, self.sockets[0])
-                ReceiveThread(cSocket, self.sockets[1])
+                ReceiveThread(self.sockets[0], cSocket)
 
 class ReceiveThread(threading.Thread):
     def __init__(self, sock, otherSock):
