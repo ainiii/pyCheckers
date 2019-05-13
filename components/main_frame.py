@@ -53,6 +53,9 @@ class MainFrame(tk.Frame):
         ai.AIThread('127.0.0.1', 50000)
         pass
 
+    def reset(self):
+        self.showMenu()
+
     def showGame(self):
         self.mainMenu.hide()
         self.gameBoard.show()

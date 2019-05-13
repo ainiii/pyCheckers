@@ -24,9 +24,10 @@ class GameBoard(tk.Frame, AbstractFrame):
         }
         self.model = False
 
-        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0, width=rows*size, height=columns*size + 20)
+        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0, width=rows*size, height=columns*size + 40)
         self.highlight = False
-        self.topTxt = False
+        self.resetButton = False
+        self.bottomTxt = False
         self.lastHighlight = False
         self.canvas.bind('<Configure>', self.onResize)
         self.canvas.bind('<Button-1>', self.onClick)
@@ -36,10 +37,10 @@ class GameBoard(tk.Frame, AbstractFrame):
         UpdateThread(self, model)
 
     def changeTurn(self, player):
-        self.canvas.itemconfigure(self.topTxt, text="Player " + str(player) + " turn")
+        self.canvas.itemconfigure(self.bottomTxt, text="Player " + str(player) + " turn")
 
     def setWinner(self, player):
-        self.canvas.itemconfigure(self.topTxt, text="Player " + str(player) + " won the game, restarting in 5 seconds")
+        self.canvas.itemconfigure(self.bottomTxt, text="Player " + str(player) + " won the game, restarting in 5 seconds")
         time.sleep(5)
         self.parent.showMenu()
 
@@ -88,7 +89,8 @@ class GameBoard(tk.Frame, AbstractFrame):
         color = self.color2
 
         self.size = min(newXSize, newYSize)
-        self.canvas.coords(self.topTxt, self.rows * self.size / 2, self.columns * self.size + 10)
+        self.canvas.coords(self.bottomTxt, self.rows * self.size / 2, self.columns * self.size + 10)
+        self.canvas.coords(self.resetButton, 10, self.columns * self.size + 10, 30, self.columns * self.size + 30)
         self.canvas.delete('tile')
 
         for row in range(self.rows):
@@ -126,11 +128,17 @@ class GameBoard(tk.Frame, AbstractFrame):
 
         self.parent.gameInstance.onClick(result)
 
+    def onResetButton(self, event):
+        self.parent.reset()
+
     def show(self):
         self.pack(side='top', fill='both', expand=True)
         self.canvas.pack(side='top', fill='both', expand=True)
-        self.topTxt = self.canvas.create_text(self.rows * self.size / 2, self.columns * self.size + 10, text="Player 1 turn")
+        self.resetButton = self.canvas.create_rectangle(10, self.columns * self.size + 10, 30, self.columns * self.size + 30, fill="grey40", outline="grey60")
+        self.bottomTxt = self.canvas.create_text(self.rows * self.size / 2, self.columns * self.size + 10, text="Player 1 turn")
         self.canvas.create_image(0, 0, image=self.pieceImages['highlight'], tags='highlight', anchor='c', state=tk.HIDDEN)
+
+        self.canvas.tag_bind(self.resetButton, '<Button-1>', self.onResetButton)
 
     def hide(self):
         self.pack_forget()
