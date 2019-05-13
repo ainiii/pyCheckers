@@ -14,7 +14,13 @@ class ServerThread(threading.Thread, abstract_thread.AbstractThread):
 
     def run(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.bind((self.ip, self.port))
+
+        try:
+            self.sock.bind((self.ip, self.port))
+        except:
+            self.isRunning = False
+            return
+
         self.sock.listen(2)
 
         while self.isRunning:

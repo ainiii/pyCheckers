@@ -1,3 +1,5 @@
+import move_exception
+
 class Game:
     def __init__(self, player, sock, model):
         self.player = player
@@ -17,21 +19,31 @@ class Game:
             else:
                 self.model.highlightPiece(piece.name)
                 self.cPiece = piece
+                return
 
         if self.cPiece:
             possibleMoves = self.model.canCapture(self.player)
 
             if len(possibleMoves) > 0:
-                if (self.cPiece.name, result[0], result[1]) in possibleMoves:
+                try:
+                    if not (self.cPiece.name, result[0], result[1]) in possibleMoves:
+                        raise move_exception.MoveException('capture')
+
                     self.sock.send(str.encode('m|' + str(self.cPiece.name) + '|' + str(result[0]) + '|' + str(result[1])))
-                    return
-                else:
+                except move_exception.MoveException as me:
+                    self.model.addEvent('error|' + str(me))
+                finally:
                     return
 
-            if self.model.isValidMove(self.cPiece, result[0], result[1]):
+            try:
+                if not self.model.isValidMove(self.cPiece, result[0], result[1]):
+                    raise move_exception.MoveException('move')
+
                 self.sock.send(str.encode('m|' + str(self.cPiece.name) + '|' + str(result[0]) + '|' + str(result[1])))
-            else:
-                pass
+            except move_exception.MoveException as me:
+                self.model.addEvent('error|' + str(me))
+            finally:
+                return
 
     def onMessage(self, message):
         text = message.split('|')

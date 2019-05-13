@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import threading
 import time
 import abstract_thread
@@ -70,6 +71,16 @@ class GameBoard(tk.Frame, AbstractFrame):
     def removeHighlight(self):
         self.lastHighlight = False
         self.canvas.itemconfigure('highlight', state=tk.HIDDEN)
+
+    def errorBox(self, errorType):
+        msg = ''
+
+        if errorType == 'capture':
+            msg = 'Invalid move, capture required.'
+        elif errorType == 'move':
+            msg = 'Invalid move.'
+
+        tk.messagebox.showinfo('Error', msg)
 
     def onResize(self, event):
         newXSize = int(event.width / self.columns)
@@ -164,6 +175,11 @@ class UpdateThread(threading.Thread, abstract_thread.AbstractThread):
                 elif eType == 'winner':
                     winner = result[1]
                     self.parent.setWinner(winner)
+                elif eType == 'refresh':
+                    self.parent.onResize(type('event', (), {'width': self.parent.winfo_width(), 'height': self.parent.winfo_height()}))
+                elif eType == 'error':
+                    errorType = result[1]
+                    self.parent.errorBox(errorType)
 
             else:
                 time.sleep(0.01)

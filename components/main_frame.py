@@ -25,7 +25,7 @@ class MainFrame(tk.Frame):
         self.showMenu()
 
     def hostGame(self, ip, port):
-        server.ServerThread(ip, port)
+        server.ServerThread(ip, int(port))
         self.joinGame(ip, port, 1)
 
     def joinGame(self, ip, port, player=2):
@@ -36,8 +36,10 @@ class MainFrame(tk.Frame):
                 sock.connect((ip, int(port)))
                 break
             except:
-                print("Failed to join, retrying.")
+                print("Failed to join")
+                self.mainMenu.infoTxt.config(text='Failed to join')
                 time.sleep(1)
+                return
 
         self.model = model.Model()
         self.gameBoard.attachModel(self.model)
@@ -57,7 +59,7 @@ class MainFrame(tk.Frame):
 
     def showMenu(self):
         self.gameBoard.hide()
-        self.gameBoard.canvas.delete('all')
+        self.gameBoard = GameBoard(self)
         self.mainMenu.show()
         self.model = False
         self.game = False

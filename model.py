@@ -28,6 +28,8 @@ class Model:
 
                 cid += 1
 
+        self.addEvent('refresh')
+
     def changeTurn(self):
         self.turn = 1 if self.turn == 2 else 2
         self.addEvent('turn', self.turn)

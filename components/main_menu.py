@@ -6,16 +6,16 @@ class MainMenu(tk.Frame, AbstractFrame):
         tk.Frame.__init__(self, parent)
         self.parent = parent
 
-        self.hostOption = tk.Button(self, text="Host", command=self.host)
-        self.joinOption = tk.Button(self, text="Join", command=self.join)
-        self.offlineOption = tk.Button(self, text="Offline", command=self.offline)
+        self.hostOption = tk.Button(self, text="Host", command=lambda : self.host(self.hostInput.get(), self.portInput.get()))
+        self.joinOption = tk.Button(self, text="Join", command=lambda : self.join(self.hostInput.get(), self.portInput.get()))
+        self.offlineOption = tk.Button(self, text="Offline", command=lambda: self.offline())
 
         self.hostTxt = tk.Label(self, text="Ip address:")
         self.portTxt = tk.Label(self, text="Port:")
         self.hostInput = tk.Entry(self)
         self.portInput = tk.Entry(self)
 
-        self.infoTxt = tk.Label(self, text="Placeholder")
+        self.infoTxt = tk.Label(self, text="pyCheckers")
 
         self.hostOption.grid(row=0, column=2, padx=5, sticky='nesw')
         self.joinOption.grid(row=1, column=2, padx=5, sticky='nesw')
@@ -26,14 +26,10 @@ class MainMenu(tk.Frame, AbstractFrame):
         self.portInput.grid(row=1, column=1)
         self.infoTxt.grid(row=2, column=0, columnspan=2, sticky='w')
 
-    def host(self):
-        host = self.hostInput.get()
-        port = self.portInput.get()
+    def host(self, host, port):
         self.parent.hostGame(host, port)
 
-    def join(self):
-        host = self.hostInput.get()
-        port = self.portInput.get()
+    def join(self, host ,port):
         self.parent.joinGame(host, port)
 
     def offline(self):
