@@ -1,8 +1,8 @@
 import tkinter as tk
 import socket
 import time
-import server
-import client
+from multiplayer import server
+from multiplayer import client
 import game
 import model
 import threading

@@ -1,6 +1,6 @@
 import threading
 import time
-import client
+from multiplayer import client
 import model
 import socket
 import abstract_thread
